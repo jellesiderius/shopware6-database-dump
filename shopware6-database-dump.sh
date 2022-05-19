@@ -78,6 +78,7 @@ Options:
   -h --help      Display this help information.
   -d --database  Set database name
   -u --user      Set database user name
+  -pa --password Set database password
   -h --host      Set hostname for database server (default: 127.0.0.1)
   -p --port      Set database server port (default: 3306)
   --gdpr         Enable GDPR data filtering
@@ -100,6 +101,7 @@ _DATABASE=
 _HOST=127.0.0.1
 _PORT=3306
 _USER=
+_PASSWORD=
 
 __get_option_value() {
   local __arg="${1:-}"
@@ -136,6 +138,10 @@ do
       _USER="$(__get_option_value "${__arg}" "${__val:-}")"
       shift
       ;;
+    -pa|--password)
+      _PASSWORD="$(__get_option_value "${__arg}" "${__val:-}")"
+      shift
+      ;;
     -h|--host)
       _HOST="$(__get_option_value "${__arg}" "${__val:-}")"
       shift
@@ -170,7 +176,7 @@ _dump() {
     _COLUMN_STATISTICS="--column-statistics=0"
   fi
 
-  mysqldump ${_COLUMN_STATISTICS} --quick -C --hex-blob --single-transaction --no-data --host=${_HOST} --port=${_PORT} --user=${_USER} -p ${_DATABASE} | LANG=C LC_CTYPE=C LC_ALL=C sed -e 's/DEFINER[ ]*=[ ]*[^*]*\*/\*/' > ${_FILENAME}
+  mysqldump ${_COLUMN_STATISTICS} --quick -C --hex-blob --single-transaction --no-data --host=${_HOST} --port=${_PORT} --user="${_USER}" --password="${_PASSWORD}" ${_DATABASE} | LANG=C LC_CTYPE=C LC_ALL=C sed -e 's/DEFINER[ ]*=[ ]*[^*]*\*/\*/' > ${_DATABASE}
 
   _IGNORED_TABLES=()
 
@@ -236,12 +242,12 @@ _dump() {
 
   printf ">> Creating data dump...\\n"
 
-  mysqldump ${_COLUMN_STATISTICS} --no-create-info --skip-triggers --quick -C --hex-blob --single-transaction --host=${_HOST} --port=${_PORT} --user=${_USER} -p "${_IGNORED_TABLES_ARGUMENTS[@]}" ${_DATABASE} \
+  mysqldump ${_COLUMN_STATISTICS} --no-create-info --skip-triggers --quick -C --hex-blob --single-transaction --host=${_HOST} --port=${_PORT} --user="${_USER}" --password="${_PASSWORD}" "${_IGNORED_TABLES_ARGUMENTS[@]}" ${_DATABASE} \
     | LANG=C LC_CTYPE=C LC_ALL=C sed -e 's/DEFINER[ ]*=[ ]*[^*]*\*/\*/' \
-    >> ${_FILENAME}
+    >> ${_DATABASE}
 
   printf ">> Gzipping dump...\\n"
-  gzip ${_FILENAME}
+  gzip ${_DATABASE}
 
   printf ">> Dump created\\n"
 }
