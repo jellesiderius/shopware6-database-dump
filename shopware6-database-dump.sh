@@ -171,10 +171,14 @@ _dump() {
 
   printf ">> Creating structure dump...\\n"
 
-  mysqldump --column-statistics=0 --no-tablespaces --quick -C --hex-blob --single-transaction --no-data --host=${_HOST} --port=${_PORT} --user="${_USER}" --password="${_PASSWORD}" ${_DATABASE} | LANG=C LC_CTYPE=C LC_ALL=C sed -e 's/DEFINER[ ]*=[ ]*[^*]*\*/\*/' > ${_DATABASE}
+  _COLUMN_STATISTICS=
+  if mysqldump --help | grep "\-\-column-statistics" > /dev/null; then
+    _COLUMN_STATISTICS="--column-statistics=0"
+  fi
+
+  mysqldump ${_COLUMN_STATISTICS} --quick -C --hex-blob --single-transaction --no-data --host=${_HOST} --port=${_PORT} --user="${_USER}" --password="${_PASSWORD}" ${_DATABASE} | LANG=C LC_CTYPE=C LC_ALL=C sed -e 's/DEFINER[ ]*=[ ]*[^*]*\*/\*/' > shopware6-database-dump
 
   _IGNORED_TABLES=()
-
   if ((_OPTION_GDPR))
   then
     printf ">> Remove GDPR-relevant data\\n"
@@ -237,12 +241,12 @@ _dump() {
 
   printf ">> Creating data dump...\\n"
 
-  mysqldump --column-statistics=0 --no-tablespaces --no-create-info --skip-triggers --quick -C --hex-blob --single-transaction --host=${_HOST} --port=${_PORT} --user="${_USER}" --password="${_PASSWORD}" "${_IGNORED_TABLES_ARGUMENTS[@]}" ${_DATABASE} \
+  mysqldump ${_COLUMN_STATISTICS} --no-create-info --skip-triggers --quick -C --hex-blob --single-transaction --host=${_HOST} --port=${_PORT} --user="${_USER}" --password="${_PASSWORD}" "${_IGNORED_TABLES_ARGUMENTS[@]}" ${_DATABASE} \
     | LANG=C LC_CTYPE=C LC_ALL=C sed -e 's/DEFINER[ ]*=[ ]*[^*]*\*/\*/' \
-    >> ${_DATABASE}
+    >> shopware6-database-dump
 
   printf ">> Gzipping dump...\\n"
-  gzip ${_DATABASE}
+  gzip shopware6-database-dump
 
   printf ">> Dump created\\n"
 }
