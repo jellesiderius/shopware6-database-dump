@@ -176,7 +176,7 @@ _dump() {
     _COLUMN_STATISTICS="--column-statistics=0"
   fi
 
-  mysqldump ${_COLUMN_STATISTICS} --quick -C --hex-blob --single-transaction --no-data --host=${_HOST} --port=${_PORT} --user="${_USER}" --password="${_PASSWORD}" ${_DATABASE} | LANG=C LC_CTYPE=C LC_ALL=C sed -e 's/DEFINER[ ]*=[ ]*[^*]*\*/\*/' > ${_DATABASE}
+  mysqldump ${_COLUMN_STATISTICS} --quick -C --hex-blob --single-transaction --no-data --host=${_HOST} --port=${_PORT} --user="${_USER}" --password="${_PASSWORD}" ${_DATABASE} | LANG=C LC_CTYPE=C LC_ALL=C sed -e 's/DEFINER[ ]*=[ ]*[^*]*\*/\*/' > ${_DATABASE}.sql
 
   _IGNORED_TABLES=()
 
@@ -244,7 +244,7 @@ _dump() {
 
   mysqldump ${_COLUMN_STATISTICS} --no-create-info --skip-triggers --quick -C --hex-blob --single-transaction --host=${_HOST} --port=${_PORT} --user="${_USER}" --password="${_PASSWORD}" "${_IGNORED_TABLES_ARGUMENTS[@]}" ${_DATABASE} \
     | LANG=C LC_CTYPE=C LC_ALL=C sed -e 's/DEFINER[ ]*=[ ]*[^*]*\*/\*/' \
-    >> ${_DATABASE}
+    >> ${_DATABASE}.sql
 
   printf ">> Dump created\\n"
 }
