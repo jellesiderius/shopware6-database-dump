@@ -246,9 +246,6 @@ _dump() {
     | LANG=C LC_CTYPE=C LC_ALL=C sed -e 's/DEFINER[ ]*=[ ]*[^*]*\*/\*/' \
     >> ${_DATABASE}
 
-  printf ">> Gzipping dump...\\n"
-  gzip ${_DATABASE}
-
   printf ">> Dump created\\n"
 }
 
